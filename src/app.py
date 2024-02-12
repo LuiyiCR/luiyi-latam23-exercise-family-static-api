@@ -25,18 +25,48 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+
+# Generate a new member
+@app.route('/member', methods=['POST'])
+def add_member():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+    
+    member = request.get_json()
+    if 'first_name' not in member or 'age' not in member or 'lucky_numbers' not in member:
+        return jsonify({"msg": "All parameters are required"}), 400
+    
+    jackson_family.add_member(member)
+    return jsonify({"msg": "Member added successfully"}), 200
+
+# Get all members
 @app.route('/members', methods=['GET'])
 def handle_hello():
-
+    try:
     # this is how you can use the Family datastructure by calling its methods
-    members = jackson_family.get_all_members()
+        members = jackson_family.get_all_members()
+        response = jsonify(members)
+        response.headers.set('Content-Type', 'application/json')
     # response_body = {
     #     "hello": "world",
     #     "family": members
     # }
-
-
-    return jsonify(members), 200
+        if not members:
+          return jsonify({"msg": "No members found"}), 400
+        return jsonify(members), 200
+    except Exception as e:
+       return jsonify({"msg": "An error ocurred"}), 500
+    
+# Get one member
+@app.route('/member/<int:member_id>', methods=['GET'])
+def get_member(member_id):
+    try:
+        member = jackson_family.get_member(member_id)
+        if not member:
+            return jsonify({"msg": "Member not found"}), 400
+        return jsonify(member), 200
+    except Exception as e:
+        return jsonify({"msg": "An error ocurred" + str(e)}), 500
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
