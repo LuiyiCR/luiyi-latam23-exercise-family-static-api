@@ -67,6 +67,19 @@ def get_member(member_id):
         return jsonify(member), 200
     except Exception as e:
         return jsonify({"msg": "An error ocurred" + str(e)}), 500
+    
+# Delete one member
+@app.route('/member/<int:member_id>', methods=['DELETE'])
+def delete_member(member_id):
+    member = jackson_family.get_member(member_id)
+    if member:
+        try:
+            jackson_family.delete_member(member_id)
+            return jsonify({"msg": "Member deleted successfully"}), 200
+        except Exception as e:
+            return jsonify({"msg": "An error ocurred" + str(e)}), 500
+    else:
+        return jsonify({"msg": "Member not found"}), 400
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
